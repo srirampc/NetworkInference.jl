@@ -6,6 +6,7 @@ using Distributed
 using Pkg
 using DelimitedFiles
 using SharedArrays
+using Muon
 
 export
     # Common types

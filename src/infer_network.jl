@@ -39,6 +39,48 @@ function get_nodes(data_file_path::String; delim::Union{Char,Bool} = false, disc
 
 end
 
+
+"""
+    get_h5ad_nodes(data_file_path::String; <keyword arguments>)
+
+Gets an array of all Nodes from an anndata h5ad file. It is assumed that the 
+`var` data entry in anndata has a column named `gene_ids`.
+
+Arguments:
+* `data_file_path`: path to the h5ad data file
+* `var_column=gene_ids`: column name in the var data frame for gene identifiers
+* `discretizer="bayesian_blocks"`: algorithm for discretizing the data
+* `estimator="maximum_likelihood"`: algorithm for estimating probabilities
+* `number_of_bins=10`: will be overwritten if using "bayesian_blocks"
+
+The "maximum_likelihood" estimator is recommended for PUC and PIDC.
+"""
+
+function get_h5ad_nodes(data_file_path::String; var_column::String = "gene_ids",
+                        discretizer = "bayesian_blocks",
+                        estimator = "maximum_likelihood",
+                        number_of_bins = 10,
+                        number_of_nodes = 0)
+    adata = readh5ad(data_file_path)
+    nsize = size(adata.X, 2)
+    if number_of_nodes == 0
+        number_of_nodes = nsize
+    end
+    if number_of_nodes > nsize
+        number_of_nodes = nsize
+    end
+    println("Loading ", number_of_nodes , " genes.")
+    nodes = Array{Node}(undef, number_of_nodes)
+
+    for i in 1:number_of_nodes
+        nodes[i] = Node(adata.var[:, var_column][i], adata.X[1:end, i:i],
+                        discretizer, estimator, number_of_bins)
+    end
+
+    return nodes
+end
+
+
 """
     write_network_file(file_path::String, inferred_network::InferredNetwork)
 

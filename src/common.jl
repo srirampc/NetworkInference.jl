@@ -37,6 +37,27 @@ function Node(line::AbstractArray, discretizer, estimator, number_of_bins)
 
 end
 
+# Constructs a Node from a label, line of a data file. line should be an array
+# that can be cast to Float64; 
+function Node(label::String, line::AbstractArray, discretizer, estimator, number_of_bins)
+
+    raw_values = Array{Float64}(line[1:end])
+
+    # Raw values are mapped to their bin IDs
+    binned_values = zeros(Int, length(raw_values))
+
+    # If the discretizer is Bayesian blocks, number_of_bins will be
+    # overwritten by the ideal number of bins. Otherwise, it will remain
+    # the same as the value passed in.
+    number_of_bins = get_bin_ids!(raw_values, discretizer, number_of_bins, binned_values)
+
+    probabilities = get_probabilities(estimator, get_frequencies_from_bin_ids(binned_values, number_of_bins))
+
+    return Node(label, binned_values, number_of_bins, probabilities)
+
+end
+
+
 # Type for caching information between pairs of nodes:
 # - mi: mutual information
 # - si: specific information
