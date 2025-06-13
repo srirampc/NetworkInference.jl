@@ -70,12 +70,18 @@ function get_h5ad_nodes(data_file_path::String; var_column::String = "gene_ids",
         number_of_nodes = nsize
     end
     println("Loading ", number_of_nodes , " genes.")
-    nodes = Array{Node}(undef, number_of_nodes)
+    # nodes = Array{Node}(undef, number_of_nodes)
 
-    for i in 1:number_of_nodes
-        nodes[i] = Node(adata.var[:, var_column][i], adata.X[1:end, i:i],
-                        discretizer, estimator, number_of_bins)
-    end
+    # for i in 1:number_of_nodes
+    #     nodes[i] = Node(adata.var[:, var_column][i], adata.X[1:end, i:i],
+    #                     discretizer, estimator, number_of_bins)
+    # end
+    nodes = pmap(i -> Node(adata.var[:, var_column][i],
+                           adata.X[1:end, i:i],
+                           discretizer,
+                           estimator,
+                           number_of_bins),
+                 1:number_of_nodes)
 
     return nodes
 end
