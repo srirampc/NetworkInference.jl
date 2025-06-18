@@ -3,9 +3,11 @@ uuid = "6b44d3db-2bc5-5ac3-b70f-26aa69b1b11b"
 version = "0.1.1"
 
 [deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 InformationMeasures = "96684042-fbdc-5399-9b8e-d34e539a126c"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 Muon = "446846d7-b4ce-489d-bf74-72da18fe3629"
@@ -13,6 +15,8 @@ Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 SharedArrays = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
 [compat]
+ArgParse = "1.2.0"
+HDF5 = "0.17.2"
 InformationMeasures = "≥ 0.3.1"
 LightGraphs = "1.2.0"
 Muon = "0.2.1"

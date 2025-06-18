@@ -69,6 +69,7 @@ function get_h5ad_nodes(data_file_path::String; var_column::String = "gene_ids",
     if number_of_nodes > nsize
         number_of_nodes = nsize
     end
+    println("Data Size: ", size(adata.X, 1), " x ", size(adata.X, 2), ".")
     println("Loading ", number_of_nodes , " genes.")
     # nodes = Array{Node}(undef, number_of_nodes)
 
@@ -85,6 +86,68 @@ function get_h5ad_nodes(data_file_path::String; var_column::String = "gene_ids",
 
     return nodes
 end
+
+"""
+    get_h5_nodes(data_file_path::String; <keyword arguments>)
+
+Gets an array of all Nodes from an HDF5 file. It is assumed that the 
+`var` data entry in anndata has a column named `gene_ids`.
+
+Arguments:
+* `data_file_path`: path to the h5 data file
+* `data_path=/X`: HDF5 dataset containing the list of gene identifiers
+* `var_path=/var/gene_ids`: HDF5 dataset containing the list of gene identifiers
+* `discretizer="bayesian_blocks"`: algorithm for discretizing the data
+* `estimator="maximum_likelihood"`: algorithm for estimating probabilities
+* `number_of_bins=10`: will be overwritten if using "bayesian_blocks"
+
+The "maximum_likelihood" estimator is recommended for PUC and PIDC.
+"""
+
+function get_h5_nodes(data_file_path::String;
+                      data_path::String = "/X",
+                      var_path::String = "/var/gene_ids",
+                      transpose_input = false,
+                      discretizer = "bayesian_blocks",
+                      estimator = "maximum_likelihood",
+                      number_of_bins = 10,
+                      number_of_nodes = 0)
+    adata = h5read(data_file_path, data_path)
+    gene_names = h5read(data_file_path, var_path)
+    ngenes = size(gene_names, 1)
+    if transpose_input || ngenes == size(adata, 1)
+        adata = transpose(adata)
+    end
+    nsize = size(adata, 2)
+    if number_of_nodes == 0
+        number_of_nodes = nsize
+    end
+    if number_of_nodes > nsize
+        number_of_nodes = nsize
+    end
+    if number_of_nodes > size(adata, 2) 
+        println("Number of nodes(", number_of_nodes,
+                ") > Data Size (", size(adata, 2), ")")
+        return nothing
+    end
+    println("Data Size: ", size(adata, 1), " x ", size(adata, 2), ".")
+    println("Loading ", number_of_nodes , " genes.")
+    # nodes = Array{Node}(undef, number_of_nodes)
+
+    # for i in 1:number_of_nodes
+    #     nodes[i] = Node(adata.var[:, var_column][i], adata.X[1:end, i:i],
+    #                     discretizer, estimator, number_of_bins)
+    # end
+    nodes = pmap(i -> Node(gene_names[i],
+                           adata[1:end, i:i],
+                           discretizer,
+                           estimator,
+                           number_of_bins),
+                 1:number_of_nodes)
+
+    return nodes
+end
+
 
 
 """

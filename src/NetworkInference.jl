@@ -7,6 +7,7 @@ using Pkg
 using DelimitedFiles
 using SharedArrays
 using Muon
+using HDF5
 
 export
     # Common types
