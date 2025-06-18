@@ -1,16 +1,61 @@
-if size(ARGS, 1) < 2
-    println("Not enough Arguments :: ", ARGS)
-    println("Usage :: runPIDC.jl /path/to/input_file /path/to/output_file ngenes [Pkg Environment Location] ")
-    exit(1)
+using ArgParse
+
+function parse_commandline()
+    argpv = ArgParseSettings()
+
+    @add_arg_table argpv begin
+        "--env", "-e"
+            help = "Path to Environment"
+        "--hdf5"
+            help = "Use HDF5 interface"
+            action = :store_true
+        "--transpose"
+            help = "Transpose input matrix"
+            action = :store_true
+        "--num_genes", "-n"
+            help = "Number of Genes"
+            arg_type = Int
+            default = 0
+        "--genes_path", "-g"
+            help = "HDF5 dataset path to list of gene identifiers"
+            default = "/var/gene_ids"
+        "--data_path", "-d"
+            help = "HDF5 dataset path to datasets"
+            default = "/X"
+        "input_file"
+            help = "Path to input anndata/HDF5/csv file"
+            required = true
+        "output_file"
+            help = "Path to output csv file"
+            required = true
+    end
+
+    return parse_args(argpv)
 end
 
-println("Running with Input Args :: ", ARGS)
+input_args = parse_commandline()
+println("Running with Input Args :: ", input_args)
+
+dataset_file = input_args["input_file"]
+output_file = input_args["output_file"]
+data_path = input_args["data_path"]
+var_path = input_args["genes_path"]
+num_genes =  input_args["num_genes"]
+h5_flag = input_args["hdf5"]
+env_name = input_args["env"]
+
+@everywhere env_name = $env_name
+@everywhere dataset_file = $dataset_file
+@everywhere output_file = $output_file
+@everywhere data_path = $data_path
+@everywhere var_path = $var_path
+@everywhere num_genes = $num_genes
+@everywhere h5_flag = $h5_flag 
+
 # if given, third argument is environment
-if size(ARGS, 1) > 3
-    env_name = string(ARGS[4])
+if !isnothing(env_name)
     println("Activating Environment :: ", env_name)
-    @everywhere env_name = $env_name
-    @everywhere  begin
+    @everywhere begin
         import Pkg
         Pkg.activate(env_name)
     end
@@ -19,21 +64,22 @@ end
 import NetworkInference
 import LightGraphs
 
-dataset_file = string(ARGS[1])
-output_file = string(ARGS[2])
-num_genes = parse(Int32, string(ARGS[3]))
-@everywhere dataset_file = $dataset_file
-@everywhere output_file = $output_file
-@everywhere num_genes = $num_genes
-
 # load input file
-if endswith(dataset_file, ".h5ad")
-    println("Loading h5ad dataset :: ", dataset_file,
+if h5_flag
+    println("Loading HDF5 dataset :: ", dataset_file,
+            " w. ", num_genes, " genes." )
+    @time genes = NetworkInference.get_h5_nodes(dataset_file,
+                                                data_path=data_path,
+                                                var_path=var_path,
+                                                transpose_input=input_args["transpose"],
+                                                number_of_nodes=num_genes);
+elseif endswith(dataset_file, ".h5ad")
+    println("Loading Anndata dataset :: ", dataset_file,
             " w. ", num_genes, " genes." )
     @time genes = NetworkInference.get_h5ad_nodes(dataset_file,
                                                   number_of_nodes=num_genes);
 else
-    println("Loading dataset :: ", dataset_file)
+    println("Loading csv dataset :: ", dataset_file)
     @time genes = NetworkInference.get_nodes(dataset_file);
 end
  
