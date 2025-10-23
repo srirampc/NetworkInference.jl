@@ -16,6 +16,10 @@ function parse_commandline()
             help = "Number of Genes"
             arg_type = Int
             default = 0
+        "--round_digits", "-r"
+            help = "Rounding nearst of the digits"
+            arg_type = Int
+            default = nothing
         "--genes_path", "-g"
             help = "HDF5 dataset path to list of gene identifiers"
             default = "/var/gene_ids"
@@ -42,6 +46,7 @@ data_path = input_args["data_path"]
 var_path = input_args["genes_path"]
 num_genes =  input_args["num_genes"]
 h5_flag = input_args["hdf5"]
+round_digits = input_args["round_digits"]
 
 # if given, third argument is environment
 if !isnothing(input_args["env"])
@@ -63,15 +68,18 @@ if h5_flag
                                                 data_path=data_path,
                                                 var_path=var_path,
                                                 transpose_input=input_args["transpose"],
-                                                number_of_nodes=num_genes);
+                                                number_of_nodes=num_genes,
+                                                round_digits=round_digits);
 elseif endswith(dataset_file, ".h5ad")
     println("Loading Anndata dataset :: ", dataset_file,
             " w. ", num_genes, " genes." )
     @time genes = NetworkInference.get_h5ad_nodes(dataset_file,
-                                                  number_of_nodes=num_genes);
+                                                  number_of_nodes=num_genes,
+                                                  round_digits=round_digits);
 else
     println("Loading csv dataset :: ", dataset_file)
-    @time genes = NetworkInference.get_nodes(dataset_file);
+    @time genes = NetworkInference.get_nodes(dataset_file,
+                                             round_digits=round_digits);
 end
  
 # generate network

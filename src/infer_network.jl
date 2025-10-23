@@ -21,7 +21,8 @@ Arguments:
 The "maximum_likelihood" estimator is recommended for PUC and PIDC.
 """
 function get_nodes(data_file_path::String; delim::Union{Char,Bool} = false, discretizer = "bayesian_blocks",
-    estimator = "maximum_likelihood", number_of_bins = 10)
+    estimator = "maximum_likelihood", number_of_bins = 10,
+    round_digits::Union{Nothing, Int} = nothing)
 
     if delim == false
         lines = readdlm(open(data_file_path); skipstart = 1)
@@ -32,7 +33,7 @@ function get_nodes(data_file_path::String; delim::Union{Char,Bool} = false, disc
     nodes = Array{Node}(undef, number_of_nodes)
 
     for i in 1:number_of_nodes
-        nodes[i] = Node(lines[i:i, 1:end], discretizer, estimator, number_of_bins)
+        nodes[i] = Node(lines[i:i, 1:end], discretizer, estimator, number_of_bins, round_digits)
     end
 
     return nodes
@@ -60,7 +61,8 @@ function get_h5ad_nodes(data_file_path::String; var_column::String = "gene_ids",
                         discretizer = "bayesian_blocks",
                         estimator = "maximum_likelihood",
                         number_of_bins = 10,
-                        number_of_nodes = 0)
+                        number_of_nodes = 0,
+                        round_digits::Union{Nothing, Int} = nothing)
     adata = readh5ad(data_file_path)
     nsize = size(adata.X, 2)
     if number_of_nodes == 0
@@ -81,7 +83,8 @@ function get_h5ad_nodes(data_file_path::String; var_column::String = "gene_ids",
                            adata.X[1:end, i:i],
                            discretizer,
                            estimator,
-                           number_of_bins),
+                           number_of_bins,
+                           round_digits),
                  1:number_of_nodes)
 
     return nodes
@@ -111,7 +114,8 @@ function get_h5_nodes(data_file_path::String;
                       discretizer = "bayesian_blocks",
                       estimator = "maximum_likelihood",
                       number_of_bins = 10,
-                      number_of_nodes = 0)
+                      number_of_nodes = 0,
+                      round_digits::Union{Nothing, Int} = nothing)
     adata = h5read(data_file_path, data_path)
     gene_names = h5read(data_file_path, var_path)
     ngenes = size(gene_names, 1)
@@ -142,7 +146,8 @@ function get_h5_nodes(data_file_path::String;
                            adata[1:end, i:i],
                            discretizer,
                            estimator,
-                           number_of_bins),
+                           number_of_bins,
+                           round_digits),
                  1:number_of_nodes)
 
     return nodes

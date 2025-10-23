@@ -18,10 +18,14 @@ end
 
 # Constructs a Node from a line of a data file. line should be an array with
 # the label as the first element, then the raw data values.
-function Node(line::AbstractArray, discretizer, estimator, number_of_bins)
+function Node(line::AbstractArray, discretizer, estimator, number_of_bins, round_digits)
 
     label = string(line[1])
-    raw_values = Array{Float64}(line[2:end])
+    if round_digits === nothing
+        raw_values = Array{Float64}(line[2:end])
+    else
+        raw_values = round.(Array{Float64}(line[2:end]); digits=round_digits)
+    end
 
     # Raw values are mapped to their bin IDs
     binned_values = zeros(Int, length(raw_values))
@@ -39,9 +43,13 @@ end
 
 # Constructs a Node from a label, line of a data file. line should be an array
 # that can be cast to Float64; 
-function Node(label::String, line::AbstractArray, discretizer, estimator, number_of_bins)
+function Node(label::String, line::AbstractArray, discretizer, estimator, number_of_bins, round_digits)
 
-    raw_values = Array{Float64}(line[1:end])
+    if round_digits === nothing
+        raw_values = Array{Float64}(line[1:end])
+    else
+        raw_values = round.(Array{Float64}(line[1:end]); digits=round_digits)
+    end
 
     # Raw values are mapped to their bin IDs
     binned_values = zeros(Int, length(raw_values))

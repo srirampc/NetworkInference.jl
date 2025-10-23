@@ -4,6 +4,7 @@ version = "0.1.1"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -16,6 +17,7 @@ SharedArrays = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
 [compat]
 ArgParse = "1.2.0"
+DataStructures = "0.18.22"
 HDF5 = "0.17.2"
 InformationMeasures = "≥ 0.3.1"
 LightGraphs = "1.2.0"
