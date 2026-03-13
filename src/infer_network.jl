@@ -296,8 +296,8 @@ function infer_network(data_file_path::String, inference::AbstractNetworkInferen
     discretizer = "bayesian_blocks", estimator = "maximum_likelihood", number_of_bins = 10, base = 2,
     out_file_path = "")
 
-    println("Getting nodes...")
-    nodes = get_nodes(
+    println("Bulding nodes...")
+    nodes = @time get_nodes(
         data_file_path,
         delim = delim,
         discretizer = discretizer,

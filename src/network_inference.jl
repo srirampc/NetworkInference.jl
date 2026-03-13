@@ -104,15 +104,22 @@ function get_puc_scores(nodes, number_of_nodes, estimator, base)
         increment_puc_scores(y, z, source2_target.mi, redundancy, puc_scores)
     end
 
-    node_pairs = Array{NodePair}(undef, number_of_nodes, number_of_nodes)
-    puc_scores = SharedArray{Float64}(number_of_nodes, number_of_nodes)
-
-    for i in 1 : number_of_nodes
-        for j in i+1 : number_of_nodes
-            get_node_pairs(nodes[i], nodes[j], i, j, base)
+    function build_node_pairs()
+        for i in 1 : number_of_nodes
+            for j in i+1 : number_of_nodes
+                get_node_pairs(nodes[i], nodes[j], i, j, base)
+            end
         end
     end
 
+
+    node_pairs = Array{NodePair}(undef, number_of_nodes, number_of_nodes)
+    puc_scores = SharedArray{Float64}(number_of_nodes, number_of_nodes)
+
+    println("Bulding node pairs...")
+    @time build_node_pairs()
+
+    println("Computing PUC values...")
     @sync @distributed for i in 1 : number_of_nodes
         for j in i+1 : number_of_nodes
             for k in j+1 : number_of_nodes

@@ -74,7 +74,8 @@ import LightGraphs
 if h5_flag
     println("Loading HDF5 dataset :: ", dataset_file,
             " w. ", num_genes, " genes." )
-    @time genes = NetworkInference.get_h5_nodes(dataset_file,
+    println("Bulding nodes...")
+    genes = @time NetworkInference.get_h5_nodes(dataset_file,
                                                 data_path=data_path,
                                                 var_path=var_path,
                                                 transpose_input=input_args["transpose"],
@@ -83,19 +84,21 @@ if h5_flag
 elseif endswith(dataset_file, ".h5ad")
     println("Loading Anndata dataset :: ", dataset_file,
             " w. ", num_genes, " genes." )
-    @time genes = NetworkInference.get_h5ad_nodes(dataset_file,
+    println("Bulding nodes...")
+    genes = @time NetworkInference.get_h5ad_nodes(dataset_file,
                                                   number_of_nodes=num_genes,
                                                   round_digits=round_digits);
 else
     println("Loading csv dataset :: ", dataset_file)
-    @time genes = NetworkInference.get_nodes(dataset_file,
+    println("Bulding nodes...")
+    genes = @time NetworkInference.get_nodes(dataset_file,
                                              round_digits=round_digits);
 end
  
 # generate network
 println("Building Network h5ad dataset :: ", dataset_file)
 algorithm = NetworkInference.PIDCNetworkInference()
-@time network = NetworkInference.InferredNetwork(algorithm, genes);
+network = @time NetworkInference.InferredNetwork(algorithm, genes);
  
 
 # write output file 
